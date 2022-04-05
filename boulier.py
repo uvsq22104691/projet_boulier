@@ -13,9 +13,14 @@ import tkinter as tk
 
 
 # Constantes
+# Largeur et hauteur de la fenêtre
 WIDTH = 1200
 HEIGHT = 600
+
+# Nombre de colonnes du boulier
 N = 9
+
+# Définition des couleurs
 COLOR_DESACTIVE = [
     "#550000",
     "#005500",
