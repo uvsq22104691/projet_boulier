@@ -36,10 +36,11 @@ COLOR_ACTIVE = [
 # Fonction
 def init():
     '''Fonction qui initialise le boulier'''
-    global canvas, G_boules, G_boules_Val
+    global canvas, G_boules, G_boules_Val, mode
     canvas.delete("all")
     G_boules = [[0] * 5 for _ in range(N)]
     G_boules_Val = [0] * N
+    mode = 0    # 0 = mode simulation, 1 = mode opération
 
     # Créer un ligne horizontal au quart de la hauteur de la fenêtre
     canvas.create_line(0, HEIGHT / 4, WIDTH, HEIGHT / 4, fill="darkgrey", width=5)
@@ -71,6 +72,8 @@ def init():
                     HEIGHT / 4 + ((j + 1) * HEIGHT / 8) + 30,
                     fill=COLOR_DESACTIVE[min(i // 3, len(COLOR_DESACTIVE) - 1)],
                 )
+
+            # Bind de la fonction click sur chaque boule avec les paramètres i et j représentant la position de la boule
             canvas.tag_bind(G_boules[i][j], "<Button-1>", lambda _, i=i, j=j: click(i, j))
 
 
@@ -96,14 +99,27 @@ def sauvegarder():
 
 def open_fen_options():
     '''Fonction qui ouvre la fenêtre des options'''
-    # TODO
-    pass
+    global fen_options
+    # Si la fenêtre des options existe déjà, on la met au premier plan
+    if "fen_options" in globals():
+        fen_options.focus_force()
+        return
+    # Sinon, on crée la fenêtre
+    fen_options = tk.Toplevel()
+    fen_options.title("Options")
+    fen_options.wm_protocol("WM_DELETE_WINDOW", del_fen_options)
+
+    # Lancement de la boucle principale
+    fen_options.mainloop()
 
 
 def del_fen_options():
     '''Fonction qui supprime la fenêtre des options'''
-    # TODO
-    pass
+    global fen_options
+    # Si la fenêtre existe, on la supprime
+    if "fen_options" in globals():
+        fen_options.destroy()
+        del fen_options
 
 
 def main():
@@ -137,7 +153,7 @@ def main():
     # Initialisation du boulier
     init()
 
-    # lancement de la boucle principale
+    # Lancement de la boucle principale
     root.mainloop()
 
 
