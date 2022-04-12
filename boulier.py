@@ -36,9 +36,10 @@ COLOR_ACTIVE = [
 # Fonction
 def init():
     '''Fonction qui initialise le boulier'''
-    global canvas, G_boules, G_boules_Val, mode
+    global canvas, root, G_boules, G_boules_Val, mode, L_boules
     canvas.delete("all")
     G_boules = [[0] * 5 for _ in range(N)]
+    L_boules = [0] * N
     G_boules_Val = [0] * N
     mode = 0    # 0 = mode simulation, 1 = mode opération
 
@@ -75,6 +76,9 @@ def init():
 
             # Bind de la fonction click sur chaque boule avec les paramètres i et j représentant la position de la boule
             canvas.tag_bind(G_boules[i][j], "<Button-1>", lambda _, i=i, j=j: click(i, j))
+        # Créer un label sous chaque ligne verticale pour afficher la valeur de la colonne
+        L_boules[i] = tk.Label(root, text=G_boules_Val[i], font=("Arial", 20), bg="black", fg="white")
+        L_boules[i].place(x=WIDTH / (N + 1) * (N - i) - L_boules[i].winfo_reqwidth() / 2, y=HEIGHT - L_boules[i].winfo_reqheight())
 
 
 def click(i, j):
@@ -82,7 +86,33 @@ def click(i, j):
         i : colonne de la boule en partant de la droite
         j : ligne de la boule en partant du haut'''
     global G_boules, G_boules_Val
-    # TODO
+    if mode == 0:
+        if canvas.itemcget(G_boules[i][j], 'fill') in COLOR_DESACTIVE:
+            if j == 0:
+                if canvas.itemcget(G_boules[i][j], 'fill') in COLOR_DESACTIVE:
+                    canvas.itemconfig(G_boules[i][j], fill=COLOR_ACTIVE[min(i // 3, len(COLOR_ACTIVE) - 1)])
+                    canvas.move(G_boules[i][j], 0, HEIGHT / 8)
+                    G_boules_Val[i] += 5
+            else:
+                for k in range(1, j + 1):
+                    if canvas.itemcget(G_boules[i][k], 'fill') in COLOR_DESACTIVE:
+                        canvas.itemconfig(G_boules[i][k], fill=COLOR_ACTIVE[min(i // 3, len(COLOR_ACTIVE) - 1)])
+                        canvas.move(G_boules[i][k], 0, -HEIGHT / 8)
+                        G_boules_Val[i] += 1
+            L_boules[i].config(text=G_boules_Val[i])
+        else:
+            if j == 0:
+                if canvas.itemcget(G_boules[i][j], 'fill') in COLOR_ACTIVE:
+                    canvas.itemconfig(G_boules[i][j], fill=COLOR_DESACTIVE[min(i // 3, len(COLOR_DESACTIVE) - 1)])
+                    canvas.move(G_boules[i][j], 0, -HEIGHT / 8)
+                    G_boules_Val[i] -= 5
+            else:
+                for k in range(j, 5):
+                    if canvas.itemcget(G_boules[i][k], 'fill') in COLOR_ACTIVE:
+                        canvas.itemconfig(G_boules[i][k], fill=COLOR_DESACTIVE[min(i // 3, len(COLOR_DESACTIVE) - 1)])
+                        canvas.move(G_boules[i][k], 0, HEIGHT / 8)
+                        G_boules_Val[i] -= 1
+            L_boules[i].config(text=G_boules_Val[i])
 
 
 def charger():
@@ -133,20 +163,29 @@ def main():
     root.resizable(False, False)
     root.configure(bg="darkgrey")
 
+    # Création du Menu
+    menuBar = tk.Menu(root)
+
+    # Création du menu Fichier
+    menu_file = tk.Menu(menuBar, tearoff=0)
+    menu_file.add_command(label="Réinitialiser", command=init)
+    menu_file.add_command(label="Charger", command=charger)
+    menu_file.add_command(label="Sauvegarder", command=sauvegarder)
+
+    # Création du menu Options
+    menu_options = tk.Menu(menuBar, tearoff=0)
+    menu_options.add_command(label="Options", command=open_fen_options)
+
+    # Ajout des menus au menuBar
+    menuBar.add_cascade(label="Fichier", menu=menu_file)
+    menuBar.add_cascade(label="Options", menu=menu_options)
+
+    root.config(menu=menuBar)
     # Création des widgets
     canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT, bg="black", highlightthickness=0)
 
-    B_charger = tk.Button(root, text="Charger", command=charger)
-    B_sauvegarder = tk.Button(root, text="Sauvegarder", command=sauvegarder)
-    B_reinitialiser = tk.Button(root, text="Réinitialiser", command=init)
-    B_options = tk.Button(root, text="Options", command=open_fen_options)
-
     # Placement des widgets
     canvas.grid(row=0, column=0, columnspan=4)
-    B_reinitialiser.grid(row=1, column=0)
-    B_charger.grid(row=1, column=1)
-    B_sauvegarder.grid(row=1, column=2)
-    B_options.grid(row=1, column=3)
 
     # Bind des événements
 
