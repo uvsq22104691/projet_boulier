@@ -141,7 +141,7 @@ def animation(i, j, y, op=0):
     n = 25
     ti = round((Vitesse) / n, 2)
     for k in range(n):
-        if 1:
+        if 1:   # TODO: option "clignotement"
             pass
         elif k % 10 == 0:
             canvas.itemconfig(G_boules[i][j][0], fill=COLOR_ACTIVE[i // len(COLOR_ACTIVE) % len(COLOR_ACTIVE)])
@@ -221,6 +221,16 @@ def sauvegarder():
         f.close()
 
 
+def change_vitesse(v):
+    '''Fonction qui change la vitesse de l'animation'''
+    # TODO: changer la vitesse de l'animation
+
+
+def change_nb_col(n):
+    '''Fonction qui change le nombre de colonnes du boulier'''
+    # TODO: changer le nombre de colonnes du boulier
+
+
 def ouvre_fen_options():
     '''Fonction qui ouvre la fenêtre des options'''
     global fen_options
@@ -233,12 +243,19 @@ def ouvre_fen_options():
     fen_options.title("Options")
     fen_options.wm_protocol("WM_DELETE_WINDOW", del_fen_options)
 
-    # Ajoute un Scale pour changer la vitesse des animations et un Label
+    # TODO Ajouter Label "Vitesse: "
 
-    # Ajouter une Entry pour changer le nombre de colonnes et un Label
+    # TODO Ajouter un Scale pour changer la vitesse des animations
 
-    # Ajouter un Boutton pour appliquer les changements
+    # TODO Ajouter un Label "Nombre de colonnes: "
 
+    # TODO Ajouter une Entry pour changer le nombre de colonnes
+
+    # TODO Ajouter une Checkbutton pour activer/désactiver le clignotement
+
+    # TODO Ajouter un Boutton "Appliquer" pour appliquer les changements
+
+    # Placement des widgets
     # Lancement de la boucle principale
     fen_options.mainloop()
 
