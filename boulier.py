@@ -9,6 +9,7 @@
 
 
 # Import des modules
+from glob import glob
 import tkinter as tk
 import tkinter.filedialog as fd
 import time
@@ -44,6 +45,9 @@ COLOR_ACTIVE = [
     "#0000ff"
 ]
 
+# Options
+# Clignotement
+opt_clignotement = True
 
 # Fonction
 def init(reinit=False):
@@ -142,7 +146,7 @@ def animation(i, j, y, op=0):
     n = 25
     ti = round((Vitesse) / n, 2)
     for k in range(n):
-        if 1:   # TODO: option "clignotement"
+        if not opt_clignotement:   # TODO: option "clignotement"
             pass
         elif k % 10 == 0:
             canvas.itemconfig(G_boules[i][j][0], fill=COLOR_ACTIVE[i // len(COLOR_ACTIVE) % len(COLOR_ACTIVE)])
@@ -222,14 +226,27 @@ def sauvegarder():
         f.close()
 
 
-def change_vitesse(v):
+def applique_option():
+    change_vitesse()
+    change_clignotement()
+
+
+def change_vitesse():
     '''Fonction qui change la vitesse de l'animation'''
     # TODO: changer la vitesse de l'animation
+    global Vitesse, scale
+    Vitesse = scale.get()
 
 
 def change_nb_col(n):
     '''Fonction qui change le nombre de colonnes du boulier'''
     # TODO: changer le nombre de colonnes du boulier
+
+
+def change_clignotement():
+    ''''''
+    global VarClignotement, opt_clignotement
+    opt_clignotement = VarClignotement.get()
 
 
 def ouvre_fen_options():
@@ -240,6 +257,7 @@ def ouvre_fen_options():
         fen_options.focus_force()
         return
     # Sinon, on crée la fenêtre
+    global scale, VarClignotement
     fen_options = tk.Toplevel()
     fen_options.title("Options")
     fen_options.wm_protocol("WM_DELETE_WINDOW", del_fen_options)
@@ -257,11 +275,12 @@ def ouvre_fen_options():
 
 
     # TODO Ajouter une Checkbutton pour activer/désactiver le clignotement
-    CB_clignotement = tk.Checkbutton(fen_options, text="Activer le clignotement")
+    VarClignotement = tk.BooleanVar(fen_options)
+    CB_clignotement = tk.Checkbutton(fen_options, text="Activer le clignotement", variable=VarClignotement)
 
 
     # TODO Ajouter un Boutton "Appliquer" pour appliquer les changements
-    B_appliquer = tk.Button(fen_options, text = "appliquer")
+    B_appliquer = tk.Button(fen_options, text="appliquer", command=applique_option)
 
 
     # Placement des widgets
