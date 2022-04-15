@@ -230,6 +230,7 @@ def sauvegarder():
 def applique_option():
     change_vitesse()
     change_clignotement()
+    change_nb_col()
 
 
 def change_vitesse():
@@ -239,11 +240,15 @@ def change_vitesse():
     Vitesse = scale.get()
 
 
-def change_nb_col(n):
+def change_nb_col():
     '''Fonction qui change le nombre de colonnes du boulier'''
     # TODO: changer le nombre de colonnes du boulier
-    global N, VarNbCol
-    N = VarNbCol.get()
+    global N , VarNbCol
+    N = int(VarNbCol.get())
+    init(True)
+
+    
+
 
 def change_clignotement():
     ''''''
