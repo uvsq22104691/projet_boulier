@@ -254,7 +254,7 @@ def ouvre_fen_options():
     label_nbr_colonnes = tk.Label(fen_options , text ="nombre de colonnes")
 
     # TODO Ajouter une Entry pour changer le nombre de colonnes
-
+    changer_nbr_colones = tk.Entry(fen_options, text = "changer nombre de colonnes")
 
     # TODO Ajouter une Checkbutton pour activer/désactiver le clignotement
     CB_clignotement = tk.Checkbutton(fen_options, text="Activer le clignotement")
@@ -268,6 +268,7 @@ def ouvre_fen_options():
     label_vitesse.grid(row=0, column=0)
     scale.grid(row=0, column=1)
     label_nbr_colonnes.grid(row=1 , column=0)
+    changer_nbr_colones.grid(row = 1 , column = 1)
     CB_clignotement.grid(row=2, column=0, columnspan=2)
     B_appliquer.grid(row=5, column=0, columnspan=2)
 
