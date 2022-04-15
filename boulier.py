@@ -229,6 +229,7 @@ def sauvegarder():
 def applique_option():
     change_vitesse()
     change_clignotement()
+    change_nb_col()
 
 
 def change_vitesse():
@@ -238,9 +239,14 @@ def change_vitesse():
     Vitesse = scale.get()
 
 
-def change_nb_col(n):
+def change_nb_col():
     '''Fonction qui change le nombre de colonnes du boulier'''
     # TODO: changer le nombre de colonnes du boulier
+    global N , VarNbCol
+    N = int(VarNbCol.get())
+    init(True)
+
+    
 
 
 def change_clignotement():
@@ -257,7 +263,7 @@ def ouvre_fen_options():
         fen_options.focus_force()
         return
     # Sinon, on crée la fenêtre
-    global scale, VarClignotement
+    global scale, VarClignotement, VarNbCol
     fen_options = tk.Toplevel()
     fen_options.title("Options")
     fen_options.wm_protocol("WM_DELETE_WINDOW", del_fen_options)
@@ -272,7 +278,8 @@ def ouvre_fen_options():
     label_nbr_colonnes = tk.Label(fen_options , text ="nombre de colonnes")
 
     # TODO Ajouter une Entry pour changer le nombre de colonnes
-    changer_nbr_colones = tk.Entry(fen_options, text = "changer nombre de colonnes")
+    VarNbCol = tk.StringVar(fen_options)
+    changer_nbr_colones = tk.Entry(fen_options, text = "changer nombre de colonnes", textvariable=VarNbCol)
 
     # TODO Ajouter une Checkbutton pour activer/désactiver le clignotement
     VarClignotement = tk.BooleanVar(fen_options)
