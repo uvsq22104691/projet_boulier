@@ -14,6 +14,7 @@ import tkinter.filedialog as fd
 import time
 import os
 import threading as th
+from matplotlib.pyplot import sca
 from win32api import GetSystemMetrics
 
 # Constantes
@@ -242,18 +243,16 @@ def ouvre_fen_options():
     fen_options = tk.Toplevel()
     fen_options.title("Options")
     fen_options.wm_protocol("WM_DELETE_WINDOW", del_fen_options)
-    fen_options.geometry("300x200")
 
     # TODO Ajouter Label "Vitesse: "
     label_vitesse = tk.Label(fen_options , text ="vitesse")
-    label_vitesse.grid(row = 0 , column =0)
 
     # TODO Ajouter un Scale pour changer la vitesse des animations
-    scale = tk.Scale(fen_options, orient='horizontal', from_=0, to=1.5 , resolution=0.1, tickinterval=2, length=350, label='label_vitesse')
+    scale = tk.Scale(fen_options, orient='horizontal', from_=0, to=1.5, resolution=0.1, tickinterval=0.5, length=150)
 
     # TODO Ajouter un Label "Nombre de colonnes: "
     label_nbr_colonnes = tk.Label(fen_options , text ="nombre de colonnes")
-    label_nbr_colonnes.grid(row=1 , column = 0) 
+
     # TODO Ajouter une Entry pour changer le nombre de colonnes
 
 
@@ -266,8 +265,11 @@ def ouvre_fen_options():
 
 
     # Placement des widgets
-    CB_clignotement.grid(row=0, column=0)
-    B_appliquer.grid(row=5, column=0)
+    label_vitesse.grid(row=0, column=0)
+    scale.grid(row=0, column=1)
+    label_nbr_colonnes.grid(row=1 , column=0)
+    CB_clignotement.grid(row=2, column=0, columnspan=2)
+    B_appliquer.grid(row=5, column=0, columnspan=2)
 
     # Lancement de la boucle principale
     fen_options.mainloop()
