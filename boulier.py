@@ -1,4 +1,4 @@
-# coding: utf-8
+                                                                                                                        # coding: utf-8
 
 # INFORMATION GROUPE
 # GROUPE MI TD 03
@@ -18,7 +18,7 @@ from win32api import GetSystemMetrics
 
 # Constantes
 # Nombre de colonnes du boulier
-N = 20
+N = 6
 
 # Largeur et hauteur de l'écran
 WIDTH_SCREEN = GetSystemMetrics(0)
@@ -242,6 +242,7 @@ def ouvre_fen_options():
     fen_options = tk.Toplevel()
     fen_options.title("Options")
     fen_options.wm_protocol("WM_DELETE_WINDOW", del_fen_options)
+    fen_options.geometry("300x200")
 
     # TODO Ajouter Label "Vitesse: "
 
@@ -251,11 +252,19 @@ def ouvre_fen_options():
 
     # TODO Ajouter une Entry pour changer le nombre de colonnes
 
+
     # TODO Ajouter une Checkbutton pour activer/désactiver le clignotement
+    CB_clignotement = tk.Checkbutton(fen_options, text="Activer le clignotement")
+
 
     # TODO Ajouter un Boutton "Appliquer" pour appliquer les changements
+    B_appliquer = tk.Button(fen_options, text = "appliquer")
+
 
     # Placement des widgets
+    CB_clignotement.grid(row=0, column=0)
+    B_appliquer.grid(row=5, column=0)
+
     # Lancement de la boucle principale
     fen_options.mainloop()
 
