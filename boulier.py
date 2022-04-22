@@ -1,4 +1,4 @@
-# coding: utf-8
+                                                                                                                        # coding: utf-8
 
 # INFORMATION GROUPE
 # GROUPE MI TD 03
@@ -9,16 +9,19 @@
 
 
 # Import des modules
+from glob import glob
 import tkinter as tk
 import tkinter.filedialog as fd
 import time
 import os
 import threading as th
+from matplotlib.pyplot import sca
+from numpy import column_stack
 from win32api import GetSystemMetrics
 
 # Constantes
 # Nombre de colonnes du boulier
-N = 20
+N = 6
 
 # Largeur et hauteur de l'écran
 WIDTH_SCREEN = GetSystemMetrics(0)
@@ -43,6 +46,9 @@ COLOR_ACTIVE = [
     "#0000ff"
 ]
 
+# Options
+# Clignotement
+opt_clignotement = True
 
 # Fonction
 def init(reinit=True):
@@ -141,7 +147,7 @@ def animation(i, j, y, op=0):
     n = 25
     ti = round((Vitesse) / n, 2)
     for k in range(n):
-        if 1:   # TODO: option "clignotement"
+        if not opt_clignotement:   # TODO: option "clignotement"
             pass
         elif k % 10 == 0:
             canvas.itemconfig(G_boules[i][j][0], fill=COLOR_ACTIVE[i // len(COLOR_ACTIVE) % len(COLOR_ACTIVE)])
@@ -222,14 +228,34 @@ def sauvegarder():
         f.close()
 
 
-def change_vitesse(v):
+def applique_option():
+    change_vitesse()
+    change_clignotement()
+    change_nb_col()
+
+
+def change_vitesse():
     '''Fonction qui change la vitesse de l'animation'''
     # TODO: changer la vitesse de l'animation
+    global Vitesse, scale
+    Vitesse = scale.get()
 
 
-def change_nb_col(n):
+def change_nb_col():
     '''Fonction qui change le nombre de colonnes du boulier'''
     # TODO: changer le nombre de colonnes du boulier
+    global N , VarNbCol
+    N = int(VarNbCol.get())
+    init(True)
+
+    
+
+
+def change_clignotement():
+    ''''''
+
+    global VarClignotement, opt_clignotement
+    opt_clignotement = VarClignotement.get()
 
 
 def ouvre_fen_options():
@@ -240,23 +266,41 @@ def ouvre_fen_options():
         fen_options.focus_force()
         return
     # Sinon, on crée la fenêtre
+    global scale, VarClignotement, VarNbCol
     fen_options = tk.Toplevel()
     fen_options.title("Options")
     fen_options.wm_protocol("WM_DELETE_WINDOW", del_fen_options)
 
     # TODO Ajouter Label "Vitesse: "
+    label_vitesse = tk.Label(fen_options , text ="vitesse")
 
     # TODO Ajouter un Scale pour changer la vitesse des animations
+    scale = tk.Scale(fen_options, orient='horizontal', from_=0, to=1.5, resolution=0.1, tickinterval=0.5, length=150)
 
     # TODO Ajouter un Label "Nombre de colonnes: "
+    label_nbr_colonnes = tk.Label(fen_options , text ="nombre de colonnes")
 
     # TODO Ajouter une Entry pour changer le nombre de colonnes
+    VarNbCol = tk.StringVar(fen_options)
+    changer_nbr_colones = tk.Entry(fen_options, text="changer nombre de colonnes", textvariable=VarNbCol)
 
     # TODO Ajouter une Checkbutton pour activer/désactiver le clignotement
+    VarClignotement = tk.BooleanVar(fen_options)
+    CB_clignotement = tk.Checkbutton(fen_options, text="Activer le clignotement", variable=VarClignotement)
+
 
     # TODO Ajouter un Boutton "Appliquer" pour appliquer les changements
+    B_appliquer = tk.Button(fen_options, text="appliquer", command=applique_option)
+
 
     # Placement des widgets
+    label_vitesse.grid(row=0, column=0)
+    scale.grid(row=0, column=1)
+    label_nbr_colonnes.grid(row=1 , column=0)
+    changer_nbr_colones.grid(row = 1 , column = 1)
+    CB_clignotement.grid(row=2, column=0, columnspan=2)
+    B_appliquer.grid(row=5, column=0, columnspan=2)
+
     # Lancement de la boucle principale
     fen_options.mainloop()
 
