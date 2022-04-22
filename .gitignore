@@ -127,5 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-sujet de projet.pdf
-Config/1.boulier
+*.pdf
+*.boulier

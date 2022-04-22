@@ -45,7 +45,7 @@ COLOR_ACTIVE = [
 
 
 # Fonction
-def init(reinit=False):
+def init(reinit=True):
     '''Fonction qui initialise le boulier'''
     global canvas, root, G_boules, G_boules_Val, mode, L_boules, WIDTH, N
     # On redimensionne la fenêtre
@@ -168,12 +168,13 @@ def charger():
         return None
 
     val = eval(f.read())
+    f.close()
 
     global G_boules_Val, L_boules, G_boules, N, Vitesse
     Vitesse_tmp = Vitesse
     # reinitialiser le boulier
     N = len(val)
-    init(True)
+    init()
 
     # Affecte les valeurs aux variables globales et affiche les valeurs dans les labels
     G_boules_Val = val[::-1]
@@ -272,6 +273,7 @@ def del_fen_options():
 def change_mode():
     '''Fonction qui bascule entre le mode simulation et le mode opératoire'''
     global mode
+    init()
     mode = (mode + 1) % 2
     if mode == 0:
         canvas.config(cursor="arrow")
@@ -295,7 +297,7 @@ def main():
 
     # Création du menu Fichier
     menu_file = tk.Menu(menuBar, tearoff=0)
-    menu_file.add_command(label="Réinitialiser", command=lambda: init(True))
+    menu_file.add_command(label="Réinitialiser", command=init)
     menu_file.add_command(label="Charger", command=charger)
     menu_file.add_command(label="Sauvegarder", command=sauvegarder)
 
@@ -322,7 +324,7 @@ def main():
     # Bind des événements
 
     # Initialisation du boulier
-    init()
+    init(False)
 
     # Lancement de la boucle principale
     root.mainloop()
