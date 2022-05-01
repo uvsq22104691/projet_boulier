@@ -166,18 +166,18 @@ def addition(nb1: int, nb2: int, mult=False):
     global N, L_boules_op
 
     n = len(str(int(nb1) + int(nb2)))
-    nbAff = list(map(int, "0" * (len(nb2) - len(nb1)) + nb1))
-    nb = list(map(int, nb2))
+    nbAff = list(map(int, "0" * (len(nb2) + 1 - len(nb1)) + nb1))
+    nb = list(map(int, "0" + nb2))
     n = N - len(nb)
-    for i, e in enumerate(nb):
-        L_boules_op[n + i]['text'] = str(e)
-
     if not mult:
         if abs(n - N) > 3:
             N = n
         affiche(nb1)
+    for i, e in enumerate(nb):
+        L_boules_op[n + i]['text'] = str(e)
+        canvas.update()
 
-        wait(2000)
+    wait(2000)
 
     i = 1
     while nb != [0] * len(nb):
@@ -195,15 +195,15 @@ def addition(nb1: int, nb2: int, mult=False):
                 nbAff[-i] -= 5 - nb[-i] % 5
                 nb[-i] += 5 - nb[-i] % 5
                 j = i
-                while j >= 0:
-                    if nb[j] >= 10:
-                        nb[j] -= 10
-                        nb[j - 1] += 1
-                        L_boules_op[j]['text'] = str(nb[j])
+                while j < len(nb):
+                    if nb[-j] >= 10:
+                        nb[-j] -= 10
+                        nb[-(j + 1)] += 1
+                        L_boules_op[-(j + 1)]['text'] = str(nb[-j])
                     else:
-                        L_boules_op[j]['text'] = str(nb[j])
+                        L_boules_op[-(j + 1)]['text'] = str(nb[-j])
                         break
-                    j -= 1
+                    j += 1
         if nb[-i] // 5 == 1:
             if nbAff[-i] < 5:
                 click(N - i, 0, True)
@@ -216,16 +216,16 @@ def addition(nb1: int, nb2: int, mult=False):
                 nb[-i] -= 5
                 L_boules_op[-(i + 1)]['text'] = str(nb[-i])
                 nb[i-1] += 1
-                j = i - 1
-                while j >= 0:
-                    if nb[j] >= 10:
-                        nb[j] -= 10
-                        nb[j - 1] += 1
-                        L_boules_op[j]['text'] = str(nb[j])
+                j = i + 1
+                while j < len(nb):
+                    if nb[-j] >= 10:
+                        nb[-j] -= 10
+                        nb[-j - 1] += 1
+                        L_boules_op[-j - 1]['text'] = str(nb[-j])
                     else:
-                        L_boules_op[j]['text'] = str(nb[j])
+                        L_boules_op[-j - 1]['text'] = str(nb[-j])
                         break
-                    j -= 1
+                    j += 1
 
         if nb[-i] == 0:
             i += 1
@@ -300,7 +300,7 @@ def soustraction(nb1, nb2):
 
 
 def multiplication(nb1, nb2):
-    global N, G_boules_Val, L_boules_op
+    global N, G_boules_Val, L_boules_op, L_boules
     n1 = len(str(int(nb1) * int(nb2)))
     n1 = (n1 // 3 + (1 if n1 % 3 else 0)) * 3
 
@@ -309,7 +309,9 @@ def multiplication(nb1, nb2):
 
     N = n1 + n3 + len(nb1)
     nbAff = nb1 + "0" * (n3 - n2) + nb2 + "0" * n1
+
     affiche(nbAff)
+
     wait(2000)
     for i1, e1 in enumerate(nb2[::-1]):
         if e1 == "0":
@@ -342,7 +344,7 @@ def operation_change():
         L_sym['text'] = "-"
     elif op == 2:
         L_boules_op[-1]['text'] = "*"
-        L_sym['text'] = "*"
+        L_sym['text'] = "+"
     elif op == 3:
         L_boules_op[-1]['text'] = "/"
         L_sym['text'] = "/"
@@ -559,9 +561,9 @@ def change_vitesse():
 def change_nb_col():
     '''Fonction qui change le nombre de colonnes du boulier'''
     global N, VarNbCol, L_boules
-    N = int(VarNbCol.get())
-    
-    init()
+    if int(VarNbCol.get()) != N:
+        N = int(VarNbCol.get())
+        init()
 
 
 def change_clignotement():
