@@ -55,7 +55,7 @@ opt_clignotement = True
 # Fonction
 def init(reinit=True):
     '''Fonction qui initialise le boulier'''
-    global canvas, root, G_boules, G_boules_Val, mode, L_boules, L_boules_op, WIDTH, N
+    global canvas, root, G_boules, G_boules_Val, mode, L_boules, L_boules_op, WIDTH, N, Line
 
     # On redimensionne la fenêtre
     WIDTH = 70 * (N + 1)
@@ -97,8 +97,9 @@ def init(reinit=True):
     canvas.create_line(0, HEIGHT / 4, WIDTH, HEIGHT / 4, fill="darkgrey", width=5)
 
     # Créer N ligne verticales
+    Line = [0] * N
     for i in range(N):
-        canvas.create_line(WIDTH / (N + 1) * (i + 1), 0, WIDTH / (N + 1) * (i + 1), HEIGHT, fill="darkgrey", width=2)
+        Line[i] = canvas.create_line(WIDTH / (N + 1) * (i + 1), 0, WIDTH / (N + 1) * (i + 1), HEIGHT, fill="darkgrey", width=2)
 
     # Créer des points blancs entre les lignes verticales
     for i in range(3, N, 3):
@@ -124,8 +125,8 @@ def init(reinit=True):
                     fill=COLOR_DESACTIVE[(N - (i + 1)) // 3 % len(COLOR_DESACTIVE)],
                 )
 
-            # Bind de la fonction click sur chaque boule avec les paramètres i et j représentant la position de la boule
-            canvas.tag_bind(G_boules[i][j][0], "<Button-1>", lambda _, i=i, j=j: click(i, j))
+            # Bind de la fonction active_boule sur chaque boule avec les paramètres i et j représentant la position de la boule
+            canvas.tag_bind(G_boules[i][j][0], "<Button-1>", lambda _, i=i, j=j: active_boule(i, j))
         # Créer un label sous chaque ligne verticale pour afficher la valeur de la colonne
         L_boules[i] = tk.Label(root, text=G_boules_Val[i], font=("Arial", 20), bg="black", fg="white")
         L_boules[i].place(x=WIDTH / (N + 1) * (i + 1) - L_boules[i].winfo_reqwidth() / 2, y=HEIGHT - L_boules[i].winfo_reqheight())
@@ -142,11 +143,11 @@ def affiche(nb: str):
     for i, e in enumerate(nb):
         tmp = int(e)
         if tmp >= 5:
-            click(n + i, 0, True)
+            active_boule(n + i, 0, True)
             tmp -= 5
 
         if tmp > 0:
-            click(n + i, tmp, True)
+            active_boule(n + i, tmp, True)
 
 
 def check(var, *args):
@@ -157,24 +158,27 @@ def check(var, *args):
 
 
 def wait(t):
+    '''Fonction qui attend t milisecondes, instruction non bloquante pour le GUI'''
     var = tk.IntVar()
     root.after(t, var.set, 1)
     root.wait_variable(var)
 
 
-def addition(nb1: int, nb2: int, mult=False):
+def addition(nb1: int, nb2: int, mult=False):    
+    ''' Effectue l'addition des deux nombres pas à pas
+        nb1: str
+        nb2: str
+    '''
     global N, L_boules_op
 
     n = len(str(int(nb1) + int(nb2)))
     nbAff = list(map(int, "0" * (len(nb2) + 1 - len(nb1)) + nb1))
     nb = list(map(int, "0" + nb2))
-    n = N - len(nb)
     if not mult:
-        if abs(n - N) > 3:
-            N = n
+        N = n
         affiche(nb1)
     for i, e in enumerate(nb):
-        L_boules_op[n + i]['text'] = str(e)
+        L_boules_op[N - len(nb) + i]['text'] = str(e)
         canvas.update()
 
     wait(2000)
@@ -186,16 +190,16 @@ def addition(nb1: int, nb2: int, mult=False):
             continue
         if nb[-i] % 5 != 0:
             if nb[-i] % 5 + nbAff[-i] % 5 < 5:
-                click(N - i, nb[-i] % 5 + nbAff[-i] % 5, True)
+                active_boule(N - i, nb[-i] % 5 + nbAff[-i] % 5, True)
                 nbAff[-i] += nb[-i] % 5
                 nb[-i] -= nb[-i] % 5
                 L_boules_op[-(i + 1)]['text'] = str(nb[-i])
             else:
-                click(N - i, nbAff[-i] % 5 - (5 - nb[-i] % 5) + 1, True)
+                active_boule(N - i, nbAff[-i] % 5 - (5 - nb[-i] % 5) + 1, True)
                 nbAff[-i] -= 5 - nb[-i] % 5
                 nb[-i] += 5 - nb[-i] % 5
                 j = i
-                while j < len(nb):
+                while j <= len(nb):
                     if nb[-j] >= 10:
                         nb[-j] -= 10
                         nb[-(j + 1)] += 1
@@ -206,18 +210,18 @@ def addition(nb1: int, nb2: int, mult=False):
                     j += 1
         if nb[-i] // 5 == 1:
             if nbAff[-i] < 5:
-                click(N - i, 0, True)
+                active_boule(N - i, 0, True)
                 nbAff[-i] += 5
                 nb[-i] -= 5
                 L_boules_op[-(i + 1)]['text'] = str(nb[-i])
             else:
-                click(N - i, 0, True)
+                active_boule(N - i, 0, True)
                 nbAff[-i] -= 5
                 nb[-i] -= 5
                 L_boules_op[-(i + 1)]['text'] = str(nb[-i])
-                nb[i-1] += 1
+                nb[-i - 1] += 1
                 j = i + 1
-                while j < len(nb):
+                while j <= len(nb):
                     if nb[-j] >= 10:
                         nb[-j] -= 10
                         nb[-j - 1] += 1
@@ -235,6 +239,10 @@ def addition(nb1: int, nb2: int, mult=False):
 
 
 def soustraction(nb1, nb2):
+    ''' Effectue la soustraction des deux nombres pas à pas
+        nb1: str
+        nb2: str
+    '''
     global N, G_boules_Val, L_boules_op
     N = max(len(nb1), len(nb2))
     nb1 = "0" * (N - len(nb1)) + nb1
@@ -253,12 +261,12 @@ def soustraction(nb1, nb2):
             continue
         if nb[i] % 5 != 0:
             if nbAff[i] % 5 - nb[i] % 5 >= 0:
-                click(i, nbAff[i] % 5 - nb[i] % 5 + 1, True)
+                active_boule(i, nbAff[i] % 5 - nb[i] % 5 + 1, True)
                 nbAff[i] -= nb[i] % 5
                 nb[i] -= nb[i] % 5
                 L_boules_op[i]['text'] = str(nb[i])
             else:
-                click(i, nbAff[i] % 5 + (5 - nb[i] % 5), True)
+                active_boule(i, nbAff[i] % 5 + (5 - nb[i] % 5), True)
                 nbAff[i] += 5 - nb[i] % 5
                 nb[i] += 5 - nb[i] % 5
                 j = i
@@ -273,12 +281,12 @@ def soustraction(nb1, nb2):
                     j -= 1
         if nb[i] // 5 == 1:
             if nbAff[i] >= 5:
-                click(i, 0, True)
+                active_boule(i, 0, True)
                 nbAff[i] -= 5
                 nb[i] -= 5
                 L_boules_op[i]['text'] = str(nb[i])
             else:
-                click(i, 0, True)
+                active_boule(i, 0, True)
                 nbAff[i] -= 5
                 nb[i] -= 5
                 L_boules_op[i]['text'] = str(nb[i])
@@ -300,7 +308,11 @@ def soustraction(nb1, nb2):
 
 
 def multiplication(nb1, nb2):
-    global N, G_boules_Val, L_boules_op, L_boules
+    ''' Effectue la multiplication des deux nombres pas à pas
+        nb1: str
+        nb2: str
+    '''
+    global N, G_boules_Val, L_boules_op, L_boules, Line
     n1 = len(str(int(nb1) * int(nb2)))
     n1 = (n1 // 3 + (1 if n1 % 3 else 0)) * 3
 
@@ -308,32 +320,48 @@ def multiplication(nb1, nb2):
     n3 = (n2 // 3 + (1 if n2 % 3 else 0)) * 3
 
     N = n1 + n3 + len(nb1)
-    nbAff = nb1 + "0" * (n3 - n2) + nb2 + "0" * n1
 
+    nbAff = nb1 + "0" * (n3 - n2) + nb2 + "0" * n1
     affiche(nbAff)
+
+    # Changement couleur des labels
+    for i in range(len(nb1)):
+        L_boules[i]['fg'] = "#0000ff"
+
+    for i in range(len(nb1), len(nb1) + n3 - n2):
+        L_boules[i]['fg'] = "#bbbbbb"
+
+    for i in range(len(nb1) + n3 - n2, len(nb1) + n3 - n2 + len(nb2)):
+        L_boules[i]['fg'] = "#00ff00"
+
+    for i in range(len(nb1) + n3 - n2 + len(nb2), N):
+        L_boules[i]['fg'] = "#ff0000"
+        L_boules_op[i]['fg'] = "#ff0000"
 
     wait(2000)
+
+    inb1 = len(nb1) - 1
+    inb2 = len(nb1) + n3 - 1
+
     for i1, e1 in enumerate(nb2[::-1]):
+        if i1 != 0:
+            canvas.itemconfigure(Line[inb2 - i1 + 1], fill="darkgrey")
+        canvas.itemconfigure(Line[inb2 - i1], fill="#ff0000")
+
         if e1 == "0":
             continue
+
         for i2, e2 in enumerate(nb1[::-1]):
+            if i2 != 0:
+                canvas.itemconfigure(Line[inb1 - i2 + 1], fill="darkgrey")
+            canvas.itemconfigure(Line[inb1 - i2], fill="#ff0000")
             nbAff = addition(nbAff, str(int(e1 + "0" * i1) * int(e2 + "0" * i2)), True)
             wait(1000)
-
-
-def division(nb1, nb2):
-    global N, G_boules_Val, L_boules_op
-    n1 = len(nb1)
-    n1 = (n1 // 3 + (1 if n1 % 3 else 0)) * 3
-
-    n2 = len(nb2)
-
-    N = n1 + n2 + (2 if nb1[0] <= nb2[0] else 3)
-    nbAff = nb1 + "0" * (n1 - len(nb2)) + nb2
-    affiche(nbAff)
+        canvas.itemconfigure(Line[inb1], fill="darkgrey")
 
 
 def operation_change():
+    '''modifie les labels des opérations'''
     global type_Operation, L_sym, L_boules_op
     op = type_Operation.get()
     if op == 0:
@@ -343,21 +371,18 @@ def operation_change():
         L_boules_op[-1]['text'] = "-"
         L_sym['text'] = "-"
     elif op == 2:
-        L_boules_op[-1]['text'] = "*"
-        L_sym['text'] = "+"
-    elif op == 3:
-        L_boules_op[-1]['text'] = "/"
-        L_sym['text'] = "/"
+        L_boules_op[-1]['text'] = "+"
+        L_sym['text'] = "*"
 
 
 def operation(nb1, nb2):
-    global type_Operation, CB_Add, CB_Sub, CB_Mul, CB_Div, E_nb1, E_nb2, B_Valider
+    '''applique l'opération choisie, désactive les boutons pendant le calcul puis les réactive'''
+    global type_Operation, CB_Add, CB_Sub, CB_Mul, E_nb1, E_nb2, B_Valider
     op = type_Operation.get()
 
     CB_Add.config(state=tk.DISABLED)
     CB_Sub.config(state=tk.DISABLED)
     CB_Mul.config(state=tk.DISABLED)
-    CB_Div.config(state=tk.DISABLED)
     E_nb1.config(state=tk.DISABLED)
     E_nb2.config(state=tk.DISABLED)
     B_Valider.config(state=tk.DISABLED)
@@ -368,20 +393,18 @@ def operation(nb1, nb2):
         soustraction(nb1, nb2)
     elif op == 2:
         multiplication(nb1, nb2)
-    elif op == 3:
-        division(nb1, nb2)
 
     CB_Add.config(state=tk.NORMAL)
     CB_Sub.config(state=tk.NORMAL)
     CB_Mul.config(state=tk.NORMAL)
-    CB_Div.config(state=tk.NORMAL)
     E_nb1.config(state=tk.NORMAL)
     E_nb2.config(state=tk.NORMAL)
     B_Valider.config(state=tk.NORMAL)
 
 
 def menu_operation(root):
-    global type_Operation, L_sym, nb1, nb2, CB_Add, CB_Sub, CB_Mul, CB_Div, E_nb1, E_nb2, B_Valider
+    '''Création du menu à droite du boulier pour les opérations'''
+    global type_Operation, L_sym, nb1, nb2, CB_Add, CB_Sub, CB_Mul, E_nb1, E_nb2, B_Valider
 
     L_nb1 = tk.Label(root, text="Nombre 1: ", font=("Arial", 12))
     L_sym = tk.Label(root, text="+", font=("Arial", 12))
@@ -392,7 +415,6 @@ def menu_operation(root):
     CB_Add = tk.Radiobutton(root, text="Addition", variable=type_Operation, value=0)
     CB_Sub = tk.Radiobutton(root, text="Soustraction", variable=type_Operation, value=1)
     CB_Mul = tk.Radiobutton(root, text="Multiplication", variable=type_Operation, value=2)
-    CB_Div = tk.Radiobutton(root, text="Division", variable=type_Operation, value=3)
     CB_Add.select()
 
     nb1 = tk.StringVar(root)
@@ -413,7 +435,6 @@ def menu_operation(root):
     CB_Add.grid(row=0, column=1)
     CB_Sub.grid(row=0, column=2)
     CB_Mul.grid(row=1, column=1)
-    CB_Div.grid(row=1, column=2)
 
     L_nb1.grid(row=2, column=1)
     L_sym.grid(row=3, column=1)
@@ -425,10 +446,12 @@ def menu_operation(root):
     B_Valider.grid(row=5, column=1, columnspan=2)
 
 
-def click(i, j, force=False):
-    ''' Fonction qui gère le clic sur la boule en (i, j)
+def active_boule(i, j, force=False):
+    ''' Fonction qui active ou désactive la boule en (i, j)
         i : colonne de la boule en partant de la gauche
-        j : ligne de la boule en partant du haut'''
+        j : ligne de la boule en partant du haut
+        force : si True, quelque soit le mode, l'action s'effectue    
+    '''
     global G_boules, G_boules_Val
     if mode == 0 or force:
         if not G_boules[i][j][1]:
