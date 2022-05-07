@@ -164,7 +164,7 @@ def wait(t):
     root.wait_variable(var)
 
 
-def addition(nb1: int, nb2: int, mult=False):    
+def addition(nb1: int, nb2: int, mult=False):
     ''' Effectue l'addition des deux nombres pas à pas
         nb1: str
         nb2: str
@@ -450,7 +450,7 @@ def active_boule(i, j, force=False):
     ''' Fonction qui active ou désactive la boule en (i, j)
         i : colonne de la boule en partant de la gauche
         j : ligne de la boule en partant du haut
-        force : si True, quelque soit le mode, l'action s'effectue    
+        force : si True, quelque soit le mode, l'action s'effectue
     '''
     global G_boules, G_boules_Val
     if mode == 0 or force:
