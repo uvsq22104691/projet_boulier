@@ -17,23 +17,13 @@ import threading as th
 from win32api import GetSystemMetrics
 
 # Constantes
-# Nombre de colonnes du boulier
-N = 6
-
 # Largeur et hauteur de l'écran
 WIDTH_SCREEN = GetSystemMetrics(0)
 HEIGHT_SCREEN = GetSystemMetrics(1)
 
-# Hauteur et Largeur de la fenêtre
-WIDTH = 80 * (N - 1)
-HEIGHT = 600
-
 # Largeur et Hauteur de la partie opératoire
 WIDTH_OP = 300
 HEIGHT_OP = 50
-
-# Vitesse des animations
-Vitesse = 0.5
 
 # Définition des couleurs
 COLOR_DESACTIVE = [
@@ -47,14 +37,25 @@ COLOR_ACTIVE = [
     "#0000ff",
 ]
 
+# Variables globales
+# Nombre de colonnes du boulier
+N = 6
+
+# Hauteur et Largeur de la fenêtre
+WIDTH = 80 * (N - 1)
+HEIGHT = 600
+
 # Options
 # Clignotement
 opt_clignotement = True
 
+# Vitesse des animations
+Vitesse = 0.5
 
-# Fonction
+
+# Fonctions
 def init(reinit=True):
-    '''Fonction qui initialise le boulier'''
+    '''Fonction qui initialise le boulier ou le réinitialise'''
     global canvas, root, G_boules, G_boules_Val, mode, L_boules, L_boules_op, WIDTH, N, Line
 
     # On redimensionne la fenêtre
@@ -132,6 +133,108 @@ def init(reinit=True):
         L_boules[i].place(x=WIDTH / (N + 1) * (i + 1) - L_boules[i].winfo_reqwidth() / 2, y=HEIGHT - L_boules[i].winfo_reqheight())
 
 
+# Fonction utiles pour le projet
+def wait(t):
+    '''Fonction qui attend t milisecondes, instruction non bloquante pour le GUI'''
+    var = tk.IntVar()
+    root.after(t, var.set, 1)
+    root.wait_variable(var)
+
+
+# Partie opération
+def menu_operation(root):
+    '''Création du menu à droite du boulier pour les opérations'''
+    global type_Operation, L_sym, nb1, nb2, CB_Add, CB_Sub, CB_Mul, E_nb1, E_nb2, B_Valider
+
+    L_nb1 = tk.Label(root, text="Nombre 1: ", font=("Arial", 12))
+    L_sym = tk.Label(root, text="+", font=("Arial", 12))
+    L_nb2 = tk.Label(root, text="Nombre 2: ", font=("Arial", 12))
+
+    type_Operation = tk.IntVar(root)
+    type_Operation.trace_add('write', lambda *_: operation_change())
+    CB_Add = tk.Radiobutton(root, text="Addition", variable=type_Operation, value=0)
+    CB_Sub = tk.Radiobutton(root, text="Soustraction", variable=type_Operation, value=1)
+    CB_Mul = tk.Radiobutton(root, text="Multiplication", variable=type_Operation, value=2)
+    CB_Add.select()
+
+    nb1 = tk.StringVar(root)
+    nb2 = tk.StringVar(root)
+
+    nb1.set("0")
+    nb2.set("0")
+
+    nb1.trace_add("write", lambda *_: check(nb1))
+    nb2.trace_add("write", lambda *_: check(nb2))
+
+    E_nb1 = tk.Entry(root, font=("Arial", 12), width=21, textvariable=nb1)
+    E_nb2 = tk.Entry(root, font=("Arial", 12), width=21, textvariable=nb2)
+
+    B_Valider = tk.Button(root, text="Valider", font=("Arial", 12), command=lambda: operation(nb1.get(), nb2.get()))
+
+    # Placement des widgets
+    CB_Add.grid(row=0, column=1)
+    CB_Sub.grid(row=0, column=2)
+    CB_Mul.grid(row=1, column=1)
+
+    L_nb1.grid(row=2, column=1)
+    L_sym.grid(row=3, column=1)
+    L_nb2.grid(row=4, column=1)
+
+    E_nb1.grid(row=2, column=2)
+    E_nb2.grid(row=4, column=2)
+
+    B_Valider.grid(row=5, column=1, columnspan=2)
+
+
+def check(var):
+    '''Fonction qui vérifie si le nombre entré est correct'''
+    tmp = var.get()
+    if len(tmp) > 0 and not tmp[-1].isdigit() or len(tmp) > 21:
+        var.set(tmp[:-1])
+
+
+def operation_change():
+    '''modifie les labels des opérations lors du clique sur les checkbuttons'''
+    global type_Operation, L_sym, L_boules_op
+    op = type_Operation.get()
+    if op == 0:
+        L_boules_op[-1]['text'] = "+"
+        L_sym['text'] = "+"
+    elif op == 1:
+        L_boules_op[-1]['text'] = "-"
+        L_sym['text'] = "-"
+    elif op == 2:
+        L_boules_op[-1]['text'] = "+"
+        L_sym['text'] = "*"
+
+
+def operation(nb1, nb2):
+    '''applique l'opération choisie, désactive les boutons pendant le calcul puis les réactive'''
+    global type_Operation, CB_Add, CB_Sub, CB_Mul, E_nb1, E_nb2, B_Valider
+    op = type_Operation.get()
+
+    CB_Add.config(state=tk.DISABLED)
+    CB_Sub.config(state=tk.DISABLED)
+    CB_Mul.config(state=tk.DISABLED)
+    E_nb1.config(state=tk.DISABLED)
+    E_nb2.config(state=tk.DISABLED)
+    B_Valider.config(state=tk.DISABLED)
+
+    if op == 0:
+        addition(nb1, nb2)
+    elif op == 1:
+        soustraction(nb1, nb2)
+    elif op == 2:
+        multiplication(nb1, nb2)
+
+    CB_Add.config(state=tk.NORMAL)
+    CB_Sub.config(state=tk.NORMAL)
+    CB_Mul.config(state=tk.NORMAL)
+    E_nb1.config(state=tk.NORMAL)
+    E_nb2.config(state=tk.NORMAL)
+    B_Valider.config(state=tk.NORMAL)
+
+
 def affiche(nb: str):
     '''Fonction qui affiche le nombre nb dans les labels et positionne les boules au bon endroit'''
     global L_boules, G_boules, G_boules_Val, N
@@ -148,20 +251,6 @@ def affiche(nb: str):
 
         if tmp > 0:
             active_boule(n + i, tmp, True)
-
-
-def check(var, *args):
-    '''Fonction qui vérifie si le nombre entré est correct'''
-    tmp = var.get()
-    if len(tmp) > 0 and not tmp[-1].isdigit() or len(tmp) > 21:
-        var.set(tmp[:-1])
-
-
-def wait(t):
-    '''Fonction qui attend t milisecondes, instruction non bloquante pour le GUI'''
-    var = tk.IntVar()
-    root.after(t, var.set, 1)
-    root.wait_variable(var)
 
 
 def addition(nb1: int, nb2: int, mult=False):
@@ -360,92 +449,7 @@ def multiplication(nb1, nb2):
         canvas.itemconfigure(Line[inb1], fill="darkgrey")
 
 
-def operation_change():
-    '''modifie les labels des opérations'''
-    global type_Operation, L_sym, L_boules_op
-    op = type_Operation.get()
-    if op == 0:
-        L_boules_op[-1]['text'] = "+"
-        L_sym['text'] = "+"
-    elif op == 1:
-        L_boules_op[-1]['text'] = "-"
-        L_sym['text'] = "-"
-    elif op == 2:
-        L_boules_op[-1]['text'] = "+"
-        L_sym['text'] = "*"
-
-
-def operation(nb1, nb2):
-    '''applique l'opération choisie, désactive les boutons pendant le calcul puis les réactive'''
-    global type_Operation, CB_Add, CB_Sub, CB_Mul, E_nb1, E_nb2, B_Valider
-    op = type_Operation.get()
-
-    CB_Add.config(state=tk.DISABLED)
-    CB_Sub.config(state=tk.DISABLED)
-    CB_Mul.config(state=tk.DISABLED)
-    E_nb1.config(state=tk.DISABLED)
-    E_nb2.config(state=tk.DISABLED)
-    B_Valider.config(state=tk.DISABLED)
-
-    if op == 0:
-        addition(nb1, nb2)
-    elif op == 1:
-        soustraction(nb1, nb2)
-    elif op == 2:
-        multiplication(nb1, nb2)
-
-    CB_Add.config(state=tk.NORMAL)
-    CB_Sub.config(state=tk.NORMAL)
-    CB_Mul.config(state=tk.NORMAL)
-    E_nb1.config(state=tk.NORMAL)
-    E_nb2.config(state=tk.NORMAL)
-    B_Valider.config(state=tk.NORMAL)
-
-
-def menu_operation(root):
-    '''Création du menu à droite du boulier pour les opérations'''
-    global type_Operation, L_sym, nb1, nb2, CB_Add, CB_Sub, CB_Mul, E_nb1, E_nb2, B_Valider
-
-    L_nb1 = tk.Label(root, text="Nombre 1: ", font=("Arial", 12))
-    L_sym = tk.Label(root, text="+", font=("Arial", 12))
-    L_nb2 = tk.Label(root, text="Nombre 2: ", font=("Arial", 12))
-
-    type_Operation = tk.IntVar(root)
-    type_Operation.trace_add('write', lambda *_: operation_change())
-    CB_Add = tk.Radiobutton(root, text="Addition", variable=type_Operation, value=0)
-    CB_Sub = tk.Radiobutton(root, text="Soustraction", variable=type_Operation, value=1)
-    CB_Mul = tk.Radiobutton(root, text="Multiplication", variable=type_Operation, value=2)
-    CB_Add.select()
-
-    nb1 = tk.StringVar(root)
-    nb2 = tk.StringVar(root)
-
-    nb1.set("0")
-    nb2.set("0")
-
-    nb1.trace_add("write", lambda *_: check(nb1))
-    nb2.trace_add("write", lambda *_: check(nb2))
-
-    E_nb1 = tk.Entry(root, font=("Arial", 12), width=21, textvariable=nb1)
-    E_nb2 = tk.Entry(root, font=("Arial", 12), width=21, textvariable=nb2)
-
-    B_Valider = tk.Button(root, text="Valider", font=("Arial", 12), command=lambda: operation(nb1.get(), nb2.get()))
-
-    # Placement des widgets
-    CB_Add.grid(row=0, column=1)
-    CB_Sub.grid(row=0, column=2)
-    CB_Mul.grid(row=1, column=1)
-
-    L_nb1.grid(row=2, column=1)
-    L_sym.grid(row=3, column=1)
-    L_nb2.grid(row=4, column=1)
-
-    E_nb1.grid(row=2, column=2)
-    E_nb2.grid(row=4, column=2)
-
-    B_Valider.grid(row=5, column=1, columnspan=2)
-
-
+# Partie simulation
 def active_boule(i, j, force=False):
     ''' Fonction qui active ou désactive la boule en (i, j)
         i : colonne de la boule en partant de la gauche
@@ -502,8 +506,34 @@ def animation(i, j, y, op=0):
         canvas.itemconfig(G_boules[i][j][0], fill=COLOR_DESACTIVE[(N - (i + 1)) // len(COLOR_DESACTIVE) % len(COLOR_DESACTIVE)])
 
 
+# Partie sauvegarde / chargement
+def sauvegarder():
+    '''Fonction qui sauvegarde le boulier dans un fichier'''
+    fichier = fd.asksaveasfilename(
+        initialdir=os.getcwd() + "/config/",
+        title="Sauvergarder une config",
+        defaultextension=(".boulier"),
+        filetypes=(("fichier - projet boulier", "*.boulier"),)
+    )
+
+    if not fichier:
+        return
+
+    chemin = fichier.split('.')
+    if len(chemin) != 2:
+        return
+
+    chemin, ext = chemin[:]
+    if ext != 'boulier':
+        return
+
+    with open(fichier, "w") as f:
+        f.write(str(G_boules_Val[::-1]).replace(' ', ''))
+        f.close()
+
+
 def charger():
-    '''Fonction qui charge un fichier'''
+    '''Fonction qui charge un fichier pour affichier le boulier'''
     # Ouvre une feneêtre de dialogue pour choisir le fichier
     f = fd.askopenfile(
         initialdir=os.getcwd() + "/config/",
@@ -544,59 +574,7 @@ def charger():
     Vitesse = Vitesse_tmp
 
 
-def sauvegarder():
-    '''Fonction qui sauvegarde le boulier dans un fichier'''
-    fichier = fd.asksaveasfilename(
-        initialdir=os.getcwd() + "/config/",
-        title="Sauvergarder une config",
-        defaultextension=(".boulier"),
-        filetypes=(("fichier - projet boulier", "*.boulier"),)
-    )
-
-    if not fichier:
-        return
-
-    chemin = fichier.split('.')
-    if len(chemin) != 2:
-        return
-
-    chemin, ext = chemin[:]
-    if ext != 'boulier':
-        return
-
-    with open(fichier, "w") as f:
-        f.write(str(G_boules_Val[::-1]).replace(' ', ''))
-        f.close()
-
-
-def applique_option():
-    change_vitesse()
-    change_clignotement()
-    change_nb_col()
-
-
-def change_vitesse():
-    '''Fonction qui change la vitesse de l'animation'''
-    global Vitesse, scale
-    Vitesse = scale.get()
-
-
-def change_nb_col():
-    '''Fonction qui change le nombre de colonnes du boulier'''
-    global N, VarNbCol, L_boules
-    if int(VarNbCol.get()) != N:
-        N = int(VarNbCol.get())
-        init()
-
-
-def change_clignotement():
-    ''' Fonction qui change l'option "clignotement"
-        Si l'option est active, les boules clignotent quand elles se déplacent
-    '''
-    global VarClignotement, opt_clignotement
-    opt_clignotement = VarClignotement.get()
-
-
+# Partie Options
 def ouvre_fen_options():
     '''Fonction qui ouvre la fenêtre des options'''
     global fen_options
@@ -604,6 +582,7 @@ def ouvre_fen_options():
     if "fen_options" in globals():
         fen_options.focus_force()
         return
+
     # Sinon, on crée la fenêtre
     global scale, VarClignotement, VarNbCol
     fen_options = tk.Toplevel()
@@ -654,8 +633,40 @@ def del_fen_options():
         del fen_options
 
 
+def applique_option():
+    change_vitesse()
+    change_clignotement()
+    change_nb_col()
+
+
+def change_vitesse():
+    '''Fonction qui change la vitesse de l'animation'''
+    global Vitesse, scale
+    Vitesse = scale.get()
+
+
+def change_nb_col():
+    '''Fonction qui change le nombre de colonnes du boulier'''
+    global N, VarNbCol, L_boules
+    if int(VarNbCol.get()) != N:
+        N = int(VarNbCol.get())
+        init()
+
+
+def change_clignotement():
+    ''' Fonction qui change l'option "clignotement"
+        Si l'option est active, les boules clignotent quand elles se déplacent
+    '''
+    global VarClignotement, opt_clignotement
+    opt_clignotement = VarClignotement.get()
+
+
+# Changement mode simulation ou opération
 def change_mode():
-    '''Fonction qui bascule entre le mode simulation et le mode opératoire'''
+    ''' Fonction qui bascule entre le mode simulation et le mode opératoire
+        mode 0: simulation
+        mode 1: opération
+    '''
     global mode
     mode = 1 - mode
     if mode == 0:
@@ -704,8 +715,6 @@ def main():
 
     # Placement des widgets
     canvas.grid(row=0, column=0, rowspan=10)
-
-    # Bind des événements
 
     # Initialisation du boulier
     init(False)
