@@ -174,7 +174,7 @@ def menu_operation(root):
     # Placement des widgets
     CB_Add.grid(row=0, column=1)
     CB_Sub.grid(row=0, column=2)
-    CB_Mul.grid(row=1, column=1)
+    CB_Mul.grid(row=1, column=1, columnspan=2)
 
     L_nb1.grid(row=2, column=1)
     L_sym.grid(row=3, column=1)
@@ -261,8 +261,8 @@ def addition(nb1: int, nb2: int, mult=False):
     global N, L_boules_op
 
     n = len(str(int(nb1) + int(nb2)))
-    nbAff = list(map(int, "0" * (len(nb2) + 1 - len(nb1)) + nb1))
-    nb = list(map(int, "0" + nb2))
+    nbAff = list(map(int, "0" * (n - len(nb1)) + nb1))
+    nb = list(map(int, "0" * (n - len(nb2)) + nb2))
     if not mult:
         N = n
         affiche(nb1)
