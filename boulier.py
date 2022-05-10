@@ -546,7 +546,7 @@ def charger():
     if f is None:
         return None
 
-    global G_boules_Val, L_boules, G_boules, N, Vitesse, mode, opt_clignotement
+    global G_boules_Val, L_boules, G_boules, N, Vitesse, mode, opt_clignotement, fen_options
 
     data = f.read().split("\n")
     f.close()
@@ -559,6 +559,11 @@ def charger():
     N = len(val)
     mode = 0
     init()
+
+    # fermer la fenêtre option et la rouvre
+    if 'fen_options' in globals():
+        del_fen_options()
+        ouvre_fen_options()
 
     # Affecte les valeurs aux variables globales et affiche les valeurs dans les labels
     G_boules_Val = val
