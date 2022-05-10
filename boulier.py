@@ -529,6 +529,8 @@ def sauvegarder():
 
     with open(fichier, "w") as f:
         f.write(str(G_boules_Val).replace(' ', ''))
+        f.write('\n' + str(opt_clignotement))
+        f.write('\n' + str(Vitesse))
         f.close()
 
 
@@ -544,10 +546,14 @@ def charger():
     if f is None:
         return None
 
-    val = eval(f.read())
-    f.close()
+    global G_boules_Val, L_boules, G_boules, N, Vitesse, mode, opt_clignotement
 
-    global G_boules_Val, L_boules, G_boules, N, Vitesse, mode
+    data = f.read().split("\n")
+    f.close()
+    val = eval(data[0])
+    opt_clignotement = eval(data[1])
+    Vitesse = data[2]
+
     Vitesse_tmp = Vitesse
     # reinitialiser le boulier
     N = len(val)
