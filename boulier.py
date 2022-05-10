@@ -528,7 +528,7 @@ def sauvegarder():
         return
 
     with open(fichier, "w") as f:
-        f.write(str(G_boules_Val[::-1]).replace(' ', ''))
+        f.write(str(G_boules_Val).replace(' ', ''))
         f.close()
 
 
@@ -547,10 +547,11 @@ def charger():
     val = eval(f.read())
     f.close()
 
-    global G_boules_Val, L_boules, G_boules, N, Vitesse
+    global G_boules_Val, L_boules, G_boules, N, Vitesse, mode
     Vitesse_tmp = Vitesse
     # reinitialiser le boulier
     N = len(val)
+    mode = 0
     init()
 
     # Affecte les valeurs aux variables globales et affiche les valeurs dans les labels
@@ -564,7 +565,7 @@ def charger():
         if G_boules_Val[i] >= 5:
             canvas.itemconfig(G_boules[i][0][0], fill=COLOR_ACTIVE[(N - (i + 1)) // len(COLOR_ACTIVE) % len(COLOR_ACTIVE)])
             G_boules[i][0][1] = True
-            animation(i, 0, HEIGHT / 6)
+            animation(i, 0, HEIGHT / 10)
         for j in range(1, 5):
             if G_boules_Val[i] % 5 >= j:
                 canvas.itemconfig(G_boules[i][j][0], fill=COLOR_ACTIVE[(N - (i + 1)) // len(COLOR_ACTIVE) % len(COLOR_ACTIVE)])
